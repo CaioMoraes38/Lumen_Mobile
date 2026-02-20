@@ -1,40 +1,66 @@
-import { View, Text, TouchableOpacity,ImageBackground } from "react-native";
-import styles from "./stylePageSignin";
-import { SafeAreaView } from 'react-native-safe-area-context';
-import Fontisto from '@expo/vector-icons/Fontisto';
-import AntDesign from '@expo/vector-icons/AntDesign';
-import { Link } from "expo-router";
-
+import { SafeAreaView } from "react-native-safe-area-context";
+import Input from "@/src/components/defaultInput/defaultInput";
+import DefaultButton from "@/src/components/defaultButton/defaultButton";
+import { View, Text, Alert } from "react-native";
+import styles from "./stylesLoginCreate";
+import { useState } from "react";
+import { useRouter } from "expo-router";
+import  AuthService  from "../../auth/loginService";
 
 export default function Login() {
+    const router = useRouter();
+
+    const [form, setForm] = useState({
+        email: '',
+        password: ''
+    });
+
+    const handleLogin = async () => {
+        const { email, password } = form;
+        if (!email || !password) {
+            return Alert.alert("Erro", "Preencha todos os campos");
+        }
+        try {
+            await AuthService.login({ email, password });
+
+            router.replace('/(tabs)/home');
+
+        } catch (error: any) {
+            Alert.alert("Erro no Login", error.message);
+        }
+    };
+
     return (
         <SafeAreaView style={styles.safeAreaView}>
-            <View style={styles.viewTiltle}>
-                <Text style={styles.textTitle}>LÚMEN</Text>
-                <Text style={styles.textSubTitle}>PRIVATE GALLERY</Text>
+            <View style={styles.viewText}>
+                <Text style={styles.textAccount}>Welcome Back</Text>
+                <Text style={styles.textSubTitle}>Please sign in to access your account</Text>
             </View>
-            <View style={styles.container}>
-                <View style={styles.viewBottum}>
 
-                    <TouchableOpacity style={styles.button}>
-                        <AntDesign style={styles.iconPosition} name="google" size={24} color="white" />
+            <View style={styles.formContainer}>
+                <Text style={styles.label}>
+                    Email Address
+                </Text>
+                <Input
+                    placeholder="Email"
+                    onChangeText={(text) => setForm({ ...form, email: text })} />
+                <Text style={styles.label}>
+                    Password
+                </Text>
+                <Input
+                    placeholder="Password"
+                    secureTextEntry={true}
 
-                        <Text style={styles.textButton}>Sign in with Google</Text>
-                    </TouchableOpacity>
+                    onChangeText={(text) => setForm({ ...form, password: text })} />
 
-                    <TouchableOpacity style={styles.button}>
-                        <AntDesign style={styles.iconPosition} name="apple" size={24} color="white" />
-
-                        <Text style={styles.textButton}>Sign in with Apple</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.button}>
-                        <Fontisto style={styles.iconPosition} name="email" size={24} color="white" />
-
-                        <Text style={styles.textButton}>Sign in with Email</Text>
-                    </TouchableOpacity>
-                    <Text style={styles.textRegister}>Don't have an account? <Link href="/register/register" style={styles.textLink}>Sign Up</Link> </Text>
-                </View>
+                <Text style={styles.labelForgotPassword}>
+                    Forgot Password?
+                </Text>
+                <DefaultButton
+                    title="Sign In"
+                    onPress={handleLogin} />
             </View>
+
         </SafeAreaView>
-    )
+    );
 }
